@@ -1,4 +1,4 @@
-# CryptoPunks API Please leave a ⭐️ if found useful!
+# CryptoPunk Search
 
 ## Install
 
