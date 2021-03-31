@@ -292,7 +292,7 @@ function PunkCardFallback({ number }: { number: string }) {
     image: '/default.PNG',
     accessories: ['loading...'],
   };
-  return <ValidPunkCard number={number} punk={fallbackPunkData} />;
+  return <ValidPunkCard key={number} number={number} punk={fallbackPunkData} />;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -346,22 +346,18 @@ export const PunkForm = ({
     e.preventDefault();
     let parsedPunk: string = '';
     if (isNaN(parseInt(punkName))) {
-      e.currentTarget.value = '';
       return;
     }
     if (parseInt(punkName) < 100 && parseInt(punkName) >= 10) {
       parsedPunk = `0${parseInt(punkName)}`;
       onSubmit(parsedPunk);
-      e.currentTarget.value = '';
       return;
     } else if (parseInt(punkName) < 10 && parseInt(punkName) >= 0) {
       parsedPunk = `00${parseInt(punkName)}`;
       onSubmit(parsedPunk);
-      e.currentTarget.value = '';
       return;
     } else {
       onSubmit(punkName);
-      e.currentTarget.value = '';
     }
   }
 
@@ -375,6 +371,7 @@ export const PunkForm = ({
           <Input
             name='punkNumber'
             placeholder='Punk Number...'
+            type='number'
             value={punkName}
             onChange={handleChange}
           />
