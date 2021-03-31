@@ -356,6 +356,9 @@ export const PunkForm = ({
       parsedPunk = `00${parseInt(punkName)}`;
       onSubmit(parsedPunk);
       return;
+    } else if (parseInt(punkName) > 9999) {
+      parsedPunk = punkName.slice(0, 4);
+      onSubmit(parsedPunk);
     } else {
       onSubmit(punkName);
     }
