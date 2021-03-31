@@ -342,9 +342,13 @@ export const PunkForm = ({
     setPunkName(e.currentTarget.value);
   }
 
-  function handleSubmit(e: React.SyntheticEvent<HTMLButtonElement>) {
+  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     let parsedPunk: string = '';
+    if (isNaN(parseInt(punkName))) {
+      e.currentTarget.value = '';
+      return;
+    }
     if (parseInt(punkName) < 100 && parseInt(punkName) >= 10) {
       parsedPunk = `0${parseInt(punkName)}`;
       onSubmit(parsedPunk);
@@ -362,7 +366,7 @@ export const PunkForm = ({
   }
 
   return (
-    <>
+    <form style={{ width: '336px' }} onSubmit={handleSubmit}>
       <FormControl>
         <FormLabel htmlFor='punkNumber' p={2} m={0}>
           CryptoPunk Search
@@ -375,19 +379,14 @@ export const PunkForm = ({
             onChange={handleChange}
           />
           <InputRightElement w='4.5rem'>
-            <Button
-              onClick={handleSubmit}
-              size='sm'
-              h='1.75rem'
-              colorScheme='green'
-              type='submit'>
+            <Button size='sm' h='1.75rem' colorScheme='green' type='submit'>
               Submit
             </Button>
           </InputRightElement>
         </InputGroup>
         <FormHelperText>Please use 000 - 9999 format</FormHelperText>
       </FormControl>
-    </>
+    </form>
   );
 };
 
