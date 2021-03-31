@@ -344,8 +344,21 @@ export const PunkForm = ({
 
   function handleSubmit(e: React.SyntheticEvent<HTMLButtonElement>) {
     e.preventDefault();
-    onSubmit(punkName);
-    e.currentTarget.value = '';
+    let parsedPunk: string = '';
+    if (parseInt(punkName) < 100 && parseInt(punkName) >= 10) {
+      parsedPunk = `0${parseInt(punkName)}`;
+      onSubmit(parsedPunk);
+      e.currentTarget.value = '';
+      return;
+    } else if (parseInt(punkName) < 10 && parseInt(punkName) >= 0) {
+      parsedPunk = `00${parseInt(punkName)}`;
+      onSubmit(parsedPunk);
+      e.currentTarget.value = '';
+      return;
+    } else {
+      onSubmit(punkName);
+      e.currentTarget.value = '';
+    }
   }
 
   return (
