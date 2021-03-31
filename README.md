@@ -14,7 +14,7 @@
 
 # Punks API
 
-I wrote a small Node/Express server to handle the data, you can find mroe about it below:
+I wrote a small Node/Express server to handle the data, you can find out more about it below:
 
 ## Github Repo
 
