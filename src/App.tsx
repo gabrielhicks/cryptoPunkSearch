@@ -381,7 +381,7 @@ export const PunkForm = ({
             </Button>
           </InputRightElement>
         </InputGroup>
-        <FormHelperText>Please use 000 - 9999 format</FormHelperText>
+        <FormHelperText>Type a number between 000 and 9999</FormHelperText>
       </FormControl>
     </form>
   );
