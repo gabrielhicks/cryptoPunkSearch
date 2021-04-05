@@ -18,14 +18,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import type { FallbackProps } from 'react-error-boundary';
 import { ColorModeSwitcher } from './ColorModeSwitcher';
 
-//////////////////////////////////////////////////////////////////////////////////
-// Types: Many types are in-line aswell                                         //
-//                                                                              //
-// Todo:                                                                        //
-// - Learn more, finish useCallback and useReducer types!                       //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-
 type PunkData = {
   number: string;
   type: string;
@@ -39,25 +31,9 @@ type PunkInfoState =
   | { status: 'rejected'; error: Error }
   | { status: 'resolved'; data: PunkData };
 
-// type ActionType = {
-//   type: string;
-//   data: PunkData;
-//   error: Error;
-// };
-
-//////////////////////////////////////////////////////////////////////////////////
-// useSafeDispatch: Only will call dispatch if component is mounted             //
-//                                                                              //
-// - Cancels async tasks, rerenders only when component is mounted              //
-// - Takes in args, wraps and returns                                           //
-//                                                                              //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-
 function useSafeDispatch(dispatch: any) {
   const mountedRef = React.useRef(false);
 
-  // runs and cleans BEFORE DOM is painted
   React.useLayoutEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -70,15 +46,6 @@ function useSafeDispatch(dispatch: any) {
     [dispatch]
   );
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// asyncReducer: Custom reducer function to handle our many cases and states!   //
-//                                                                              //
-// - Written generically this reducer is easily used across many apps           //
-// - Works perfect with state check when rendering fallbacks/data               //
-// - Extensible!                                                                //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 function asyncReducer(state: any, action: any): any {
   switch (action.type) {
@@ -97,14 +64,6 @@ function asyncReducer(state: any, action: any): any {
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// useAsync: Custom hook to memoize and optimize our fetch request!             //
-//                                                                              //
-// - Provides accesss to async lifecycle, allowing for a timeout                //
-// - Written to eb reusable with minor adapting across APIs and apps            //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-
 function useAsync(initialState: PunkInfoState) {
   const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
     // @ts-expect-error: 'status' is specified more than once, so this usage will be overwritten.
@@ -118,16 +77,12 @@ function useAsync(initialState: PunkInfoState) {
 
   const { data, error, status } = state;
 
-  // Memoizes our fetch request, cuts down requests to API
-  // Don't want function rerendering or refetching in useEffect
   const run = React.useCallback(
     (promise) => {
       dispatch({ type: 'pending' });
       promise.then(
         (data: PunkData) => {
-          setTimeout(() => {
-            dispatch({ type: 'resolved', data });
-          }, 2000);
+          dispatch({ type: 'resolved', data });
         },
         (error: Error) => {
           error.message =
@@ -139,7 +94,6 @@ function useAsync(initialState: PunkInfoState) {
     [dispatch]
   );
 
-  // Allow use in other areas of app
   return {
     error,
     status,
@@ -148,42 +102,23 @@ function useAsync(initialState: PunkInfoState) {
   };
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// fetchPunk: Helper function to handle fetching of data                        //
-//                                                                              //
-// - Helps me create a delay to show the utility of the state pattern           //
-// - Can be generalized and adapted to various APIs                             //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-
 async function fetchPunk<PunkNumber>(
   punkNumber: PunkNumber
 ): Promise<PunkData> {
   const res = await fetch(
     `https://cryptopunks.herokuapp.com/api/punks/${punkNumber}`
   );
+
   const punkData: PunkData = await res.json();
-  if (res.ok) {
-    if (punkData.image) {
-      return punkData;
-    } else {
-      return Promise.reject(
-        new Error(`No Punk found with the number ${punkNumber}`)
-      );
-    }
+
+  if (!res.ok) {
+    return Promise.reject(
+      new Error(`No Punk found with the number ${punkNumber}`)
+    );
   }
-  //This is just written to please the linter
+
   return punkData;
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// PunkInfo: An exciting part of the app that takes in data, controls state,    //
-// and decides which component gets rendered based off of status!               //
-//                                                                              //
-// - Extensible. Rendering/mapping of components, fetching logic, easily is     //
-// implemented to delvier simple but effective user feedback with logic         //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 function PunkInfo({
   punkNumber,
@@ -200,11 +135,10 @@ function PunkInfo({
     if (!punkNumber) {
       return;
     }
-    //Memoized run function so we don't fetch too frequently
+
     run(fetchPunk(punkNumber));
   }, [punkNumber, run]);
 
-  //////////////////////////I'm a big fan of this pattern///////////////////////////
   if (status === 'idle' || !punkNumber) {
     return <p> </p>;
   } else if (status === 'pending') {
@@ -214,20 +148,11 @@ function PunkInfo({
   } else if (status === 'resolved') {
     return <ValidPunkCard number={number} punk={data} />;
   }
-  //////////////////////////////////////////////////////////////////////////////////
 
   throw new Error(
     'This exists outside the error boundry and should not display'
   );
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// ValidPunkCard: How our data gets formatted in the display window             //
-//                                                                              //
-// - Doesn't matter if its fallback or success data, it renders the same        //
-// - Standard card / reuseable component that benefits from the custom hooks    //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 function ValidPunkCard({ punk, number }: { punk: PunkData; number: string }) {
   return (
@@ -277,13 +202,6 @@ function ValidPunkCard({ punk, number }: { punk: PunkData; number: string }) {
   );
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// PunkCardFallback: Creates 'dummy' rendering data between fetches             //
-//                                                                              //
-// - Provides great user feedback, tells the user that it is working            //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-
 function PunkCardFallback({ number }: { number: string }) {
   const initialNumber = React.useRef(number).current;
   const fallbackPunkData: PunkData = {
@@ -294,13 +212,6 @@ function PunkCardFallback({ number }: { number: string }) {
   };
   return <ValidPunkCard key={number} number={number} punk={fallbackPunkData} />;
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// ErrorFallback: Fallback component for our ErrorBoundary                      //
-//                                                                              //
-// - Allows us to tell the user what went wrong, and an option to correct it    //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -313,13 +224,6 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
     </div>
   );
 }
-
-//////////////////////////////////////////////////////////////////////////////////
-// PunkForm: Controlled form component for searching punks                      //
-//                                                                              //
-// - Checks for previous submissions and sends new ones up to App               //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 export const PunkForm = ({
   punkNumber: externalPunkName,
@@ -389,14 +293,6 @@ export const PunkForm = ({
     </form>
   );
 };
-
-//////////////////////////////////////////////////////////////////////////////////
-// App: Classic accumulation of components that make up our app                 //
-//                                                                              //
-// - Global is handled and delivered here                                       //
-// - Minimalistic/simple but complete with ErrorBoundary                        //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
 
 export const App = () => {
   const [punkNumber, setPunkNumber] = React.useState('');
